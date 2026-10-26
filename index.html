@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>C++ en 90 retos · Estructura de Datos</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2218%22 fill=%22%231f6feb%22/><text x=%2250%22 y=%2268%22 font-size=%2248%22 font-family=%22monospace%22 font-weight=%22bold%22 text-anchor=%22middle%22 fill=%22white%22>C++</text></svg>">
+<meta name="theme-color" content="#0d1117">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ENCABEZADO -->
+<header class="topbar">
+  <div class="max-w-[1600px] mx-auto px-4 py-2.5 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <div class="logo">C++</div>
+      <div class="leading-tight">
+        <div class="brand">90 retos de C++</div>
+        <div class="text-xs text-dim">Estructura de Datos · UPIICSA</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <div id="compilerStatus" class="stat comp" title="Estado del compilador">⏳ Compilador…</div>
+      <div class="stat fire" title="Racha de días">🔥 <span id="streakLbl">0</span></div>
+      <div class="stat xp" title="Experiencia">⭐ <span id="xpLbl">0 XP</span></div>
+      <div class="stat prog hidden sm:flex" title="Ejercicios resueltos">✔ <span id="progLbl">0/90</span></div>
+    </div>
+  </div>
+  <div class="max-w-[1600px] mx-auto px-4 pb-2.5"><div class="gbar"><div id="globalBar" style="width:0"></div></div></div>
+</header>
+
+<!-- MAPA / RUTA -->
+<main id="mapView" class="max-w-6xl mx-auto px-4 py-6 grid lg:grid-cols-[300px_1fr] gap-8">
+  <aside class="lg:sticky lg:top-28 self-start">
+    <button id="continueBtn" class="btn btn-green w-full mb-4">▶ Continuar donde me quedé</button>
+    <div id="sideParts"></div>
+    <div class="panel p-3 mt-4 text-sm">
+      <label class="flex items-center gap-2 font-semibold cursor-pointer"><input type="checkbox" id="freeToggle" class="w-4 h-4"> Modo libre (desbloquear todo)</label>
+      <button id="resetProgress" class="text-xs text-danger underline mt-2">Borrar mi progreso</button>
+    </div>
+    <div class="text-xs text-dim mt-4 leading-relaxed">
+      <b>[U]</b> pedir valor al usuario · <b>[A]</b> llenado automático · <b>[D]</b> asignar al declarar.<br>
+      La dificultad sube de ★ a ★★★★★.
+    </div>
+  </aside>
+  <div id="path"></div>
+</main>
+
+<!-- EJERCICIO: 3 columnas  Problema | Editor | Consola -->
+<section id="exView" class="hidden max-w-[1600px] mx-auto px-4 py-4">
+  <div class="flex items-center gap-4 mb-3">
+    <button id="backBtn" class="btn btn-out">← Mapa</button>
+    <div class="flex-1 gbar"><div id="exProgress" style="width:0"></div></div>
+    <span id="solvedTag" class="hidden chip solved-tag">✔ Resuelto</span>
+  </div>
+
+  <div class="grid gap-4 xl:grid-cols-[minmax(300px,0.95fr)_minmax(0,1.6fr)_minmax(300px,1fr)] lg:grid-cols-[minmax(280px,1fr)_minmax(0,1.5fr)]">
+
+    <!-- COLUMNA 1: problema + ayudas -->
+    <aside class="flex flex-col gap-3">
+      <div class="panel p-4">
+        <div class="flex flex-wrap items-center gap-2 mb-2">
+          <span id="exPartChip" class="chip"></span>
+          <span id="exStars" class="tracking-widest text-sm"></span>
+          <span id="exModeChip" class="chip"></span>
+        </div>
+        <h1 id="exTitle" class="text-xl font-bold leading-snug"></h1>
+        <p id="exDesc" class="text-soft mt-2 leading-relaxed"></p>
+        <p id="exInput" class="hidden text-sm mt-3 inputnote">⌨ <b>Entrada:</b> <span id="exInputTxt"></span></p>
+        <p id="randNote" class="hidden text-xs text-dim mt-3">🎲 Usa números aleatorios. Al <b>validar</b>, la página fija la semilla con <code>srand(42)</code> para poder comparar tu resultado con el de referencia.</p>
+      </div>
+
+      <div class="panel p-4">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <div class="font-semibold">Ayuda</div>
+          <button id="hintBtn" class="btn btn-out btn-sm">💡 Pedir una pista</button>
+        </div>
+        <div id="hintList" class="flex flex-col gap-2"></div>
+        <div class="text-xs text-dim mt-2">Las pistas van de la idea general al detalle técnico. Ninguna te da el código completo: la solución la escribes tú.</div>
+        <div class="mt-3">
+          <button id="sampleBtn" class="text-xs underline text-soft">👀 Ver un ejemplo de la salida</button>
+          <div id="samplePane" class="hidden mt-2"><pre id="sampleOut" class="console" style="min-height:3rem;max-height:14rem"></pre></div>
+        </div>
+      </div>
+
+      <details class="panel p-4 text-sm text-soft leading-relaxed">
+        <summary class="font-semibold cursor-pointer text-ink">¿Cómo se valida?</summary>
+        <div class="mt-2">
+          Tu código se compila con <b>GCC (C++17)</b> en un servidor en línea y se ejecuta con una entrada fija de prueba. Se comparan los
+          <b>valores calculados</b> con los esperados. Eres libre de nombrar las variables y de resolverlo a tu manera; los mensajes que
+          imprimas y hasta el orden de los valores no importan. Los errores se subrayan en <b style="color:#ff9f1a">naranja</b> en el editor y se explican en español.
+        </div>
+      </details>
+    </aside>
+
+    <!-- COLUMNA 2: editor -->
+    <div class="flex flex-col gap-3 min-w-0">
+      <div class="editor-wrap">
+        <pre id="gutter"></pre>
+        <div class="editor-stack">
+          <pre id="hl" aria-hidden="true"></pre>
+          <textarea id="editor" spellcheck="false" autocapitalize="off" autocorrect="off" wrap="off"></textarea>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-2 items-center">
+        <button id="validateBtn" class="btn btn-green">✔ Validar</button>
+        <button id="runBtn" class="btn btn-blue">▶ Ejecutar en la consola</button>
+        <button id="resetBtn" class="btn btn-out">↺ Reiniciar</button>
+        <span id="compState" class="compstate"></span>
+        <button id="nextBtn" class="btn btn-green hidden ml-auto">Siguiente →</button>
+      </div>
+      <div class="text-xs text-dim">Variables y método libres: se valida el <b>resultado</b>, no tu estilo. · El código se escribe aquí (pegar desde otro sitio está desactivado). · Tab = 4 espacios · Ctrl + Enter = validar</div>
+      <div id="errStrip" class="hidden err-strip"></div>
+    </div>
+
+    <!-- COLUMNA 3: consola + veredicto -->
+    <aside class="flex flex-col gap-3 min-w-0 lg:col-span-2 xl:col-span-1">
+      <div class="panel p-3">
+        <div class="flex items-center justify-between mb-2">
+          <div class="label">CONSOLA</div>
+          <div id="meta" class="text-xs text-dim"></div>
+        </div>
+        <div id="consoleBox" class="console"></div>
+      </div>
+      <div id="verdict" class="hidden"></div>
+    </aside>
+  </div>
+</section>
+
+<div id="toast" class="hidden toast" role="status"></div>
+
+<!-- Orden de carga = capas MVVM -->
+<script src="js/data/exercises.js"></script>
+<script src="js/data/parts.js"></script>
+<script src="js/core/EventBus.js"></script>
+<script src="js/models/ExerciseModel.js"></script>
+<script src="js/models/ProgressModel.js"></script>
+<script src="js/models/CodeRepository.js"></script>
+<script src="js/services/ValidationService.js"></script>
+<script src="js/services/ErrorService.js"></script>
+<script src="js/services/HighlightService.js"></script>
+<script src="js/services/TerminalService.js"></script>
+<script src="js/services/RemoteCompiler.js"></script>
+<script src="js/services/LocalCompiler.js"></script>
+<script src="js/services/CompilerService.js"></script>
+<script src="js/viewmodels/AppViewModel.js"></script>
+<script src="js/views/StatsView.js"></script>
+<script src="js/views/PathView.js"></script>
+<script src="js/views/ExerciseView.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
